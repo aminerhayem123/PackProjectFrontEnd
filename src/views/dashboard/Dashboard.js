@@ -28,7 +28,7 @@ const Dashboard = ({ handleLogout }) => {
 
   const fetchPacks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/packs');
+      const response = await axios.get('https://packprojectbackend-production.up.railway.app/packs');
       setPacks(response.data);
     } catch (error) {
       console.error('Error fetching packs:', error);
