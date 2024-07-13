@@ -486,6 +486,7 @@ const handleSaleAmountChange = (e) => {
           onChange={handleFormChange}
           required
         />
+        <br></br>
       </Form.Group>
       <Form.Group controlId="formPrice">
         <Form.Label>Price</Form.Label>
@@ -497,6 +498,7 @@ const handleSaleAmountChange = (e) => {
           onChange={handleFormChange}
           required
         />
+        <br></br>
       </Form.Group>
       <Form.Group controlId="formNumberOfItems">
         <Form.Label>Number of Items</Form.Label>
@@ -540,6 +542,7 @@ const handleSaleAmountChange = (e) => {
         <Button variant="outline-primary" onClick={handleAddItem}>
           Add Item
         </Button>
+        <br></br>
       </Form.Group>
       <Form.Group controlId="formImages">
         <Form.Label>Images</Form.Label>
@@ -560,6 +563,7 @@ const handleSaleAmountChange = (e) => {
           )}
         </div>
       </Form.Group>
+      <br></br>
       <Button variant="primary" type="submit">
         Submit
       </Button>
@@ -609,6 +613,7 @@ const handleSaleAmountChange = (e) => {
               />
               {errorMessage && <Form.Text className="text-danger">{errorMessage}</Form.Text>}
             </Form.Group>
+            <br></br>
             <Button variant="primary" type="submit">
               Submit
             </Button>
