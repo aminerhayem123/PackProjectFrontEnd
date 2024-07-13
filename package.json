@@ -15,8 +15,8 @@
    "scripts": {
       "build": "vite build",
       "lint": "eslint \"src/**/*.js\"",
-      "serve": "vite preview",
-      "start": "vite preview"
+      "serve": "vite preview --host",
+      "start": "vite preview --host"
   },
   "dependencies": {
     "axios": "^0.27.2",
