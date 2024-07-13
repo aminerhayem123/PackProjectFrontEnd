@@ -16,7 +16,7 @@
     "build": "vite build",
     "lint": "eslint \"src/**/*.js\"",
     "serve": "vite preview",
-   "start": "npm run src/App.js"
+   "start": "npm run build"
   },
   "dependencies": {
     "axios": "^0.27.2",
