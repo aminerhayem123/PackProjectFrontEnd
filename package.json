@@ -13,7 +13,7 @@
   "license": "MIT",
   "author": "The CoreUI Team (https://github.com/orgs/coreui/people)",
   "scripts": {
-    "build": "npm run build",
+    "build": "vite build",
     "lint": "eslint \"src/**/*.js\"",
     "serve": "vite preview",
    "start": "npm start"
