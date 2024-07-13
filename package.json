@@ -11,10 +11,12 @@
     "url": "git@github.com:coreui/coreui-free-react-admin-template.git"
   },
   "license": "MIT",
-  "author": "The CoreUI Team (https://github.com/orgs/coreui/people)",
-  "scripts": {
-    "build": "npm run build",
-   "start": "npm start"
+   "author": "The CoreUI Team (https://github.com/orgs/coreui/people)",
+   "scripts": {
+      "build": "vite build",
+      "lint": "eslint \"src/**/*.js\"",
+      "serve": "vite preview",
+      "start": "vite"
   },
   "dependencies": {
     "axios": "^0.27.2",
