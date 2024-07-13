@@ -13,7 +13,7 @@
   "license": "MIT",
   "author": "The CoreUI Team (https://github.com/orgs/coreui/people)",
   "scripts": {
-   "start": "npm run dev"
+   "start": "npm run build"
   },
   "dependencies": {
     "axios": "^0.27.2",
