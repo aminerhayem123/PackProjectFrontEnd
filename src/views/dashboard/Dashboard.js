@@ -85,7 +85,7 @@ const Dashboard = ({ handleLogout }) => {
           <CTable align="middle" className="mb-0 border" hover responsive>
             <CTableHead className="text-nowrap">
               <CTableRow>
-                <CTableHeaderCell className="bg-body-tertiary">Brand</CTableHeaderCell>
+                <CTableHeaderCell className="bg-body-tertiary">Brands</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary">Items</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('price')}>
                   Price
