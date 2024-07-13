@@ -70,7 +70,7 @@ const Packs = () => {
 
   const fetchPacks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/packs');
+      const response = await axios.get('https://packprojectbackend-production.up.railway.app/packs');
       setPacks(response.data);
     } catch (error) {
       console.error('Error fetching packs:', error);
@@ -157,7 +157,7 @@ const Packs = () => {
     });
   
     try {
-      const response = await axios.post('http://localhost:5000/packs', data, {
+      const response = await axios.post('https://packprojectbackend-production.up.railway.app/packs', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -188,7 +188,7 @@ const Packs = () => {
       }
   
       // Send the POST request to add a new item
-      await axios.post(`http://localhost:5000/packs/${newItemData.packId}/items`, { name: newItemData.name });
+      await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${newItemData.packId}/items`, { name: newItemData.name });
       window.location.reload();
       // Refresh the packs list after adding the new item
       fetchPacks();
@@ -204,7 +204,7 @@ const Packs = () => {
 
   const handleDeleteItem = async (itemId) => {
     try {
-      await axios.delete(`http://localhost:5000/items/${itemId}`);
+      await axios.delete(`http://packprojectbackend-production.up.railway.app:5000/items/${itemId}`);
       fetchPacks(); // Refresh the list after deletion
       window.location.reload();
     } catch (error) {
@@ -235,7 +235,7 @@ const Packs = () => {
 
   const handleDeleteSelectedImages = async () => {
     try {
-      await axios.delete(`http://localhost:5000/images/delete`, {
+      await axios.delete(`https://packprojectbackend-production.up.railway.app/images/delete`, {
         data: { imageIds: selectedImageIds }, // Pass array of selected image IDs to delete
       });
   
@@ -291,7 +291,7 @@ const Packs = () => {
     const profit = saleAmount - selectedPackPrice;
   
     try {
-      const response = await axios.post(`http://localhost:5000/packs/${selectedPackId}/sold`, {
+      const response = await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${selectedPackId}/sold`, {
         amount: saleAmount,
         profit: profit,
       });
