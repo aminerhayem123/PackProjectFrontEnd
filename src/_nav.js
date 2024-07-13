@@ -31,12 +31,12 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'packs',
+        name: 'Packs',
         to: '/packs',
       },
       {
         component: CNavItem,
-        name: 'items',
+        name: 'Items',
         to: '/items',
       },
       {
