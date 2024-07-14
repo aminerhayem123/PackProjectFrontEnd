@@ -204,7 +204,7 @@ const Packs = () => {
 
   const handleDeleteItem = async (itemId) => {
     try {
-      await axios.delete(`http://packprojectbackend-production.up.railway.app/items/${itemId}`);
+      await axios.delete(`https://packprojectbackend-production.up.railway.app/items/${itemId}`);
       fetchPacks(); // Refresh the list after deletion
       window.location.reload();
     } catch (error) {
