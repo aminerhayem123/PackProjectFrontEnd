@@ -557,14 +557,14 @@ const handleSaleAmountChange = (e) => {
               </div>
             ))}
           </div>
-          {formData.images.length > 0 && (
+        </div>
+      </Form.Group>
+      <br></br>
+      {formData.images.length > 0 && (
             <Button variant="outline-danger" onClick={() => setFormData({ ...formData, images: [] })} style={{ marginTop: '10px' }}>
               Clear Images
             </Button>
           )}
-        </div>
-      </Form.Group>
-      <br></br>
       <Button variant="primary" type="submit">
         Submit
       </Button>
