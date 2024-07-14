@@ -412,19 +412,21 @@ const handleSaleAmountChange = (e) => {
                       setNewItemData({ packId: pack.id, name: '' });
                       setShowItemForm(true);
                     }}
+                    style={{ marginRight: '6px' }}
                   >
-                    <i className="fas fa-plus" style={{ marginRight: '8px' }}></i> Add Item
+                    <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
                   </Button>
                   <Button
                     variant="primary"
                     onClick={() => handleSold(pack.id, pack.price)}
-                  >&nbsp;
+                    style={{ marginRight: '6px' }}
+                  >
                     <i className="fas fa-dollar-sign" style={{ marginRight: '8px' }}></i>Sold
                   </Button>
                   <Button
                     variant="primary"
                     onClick={() => handleAddImages(pack.id)}
-                  >&nbsp;
+                  >
                     <i className="fas fa-image"></i> Add Images
                   </Button>
                 </CTableDataCell>
