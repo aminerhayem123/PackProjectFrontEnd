@@ -419,7 +419,7 @@ const handleSaleAmountChange = (e) => {
                   <Button
                     variant="primary"
                     onClick={() => handleSold(pack.id, pack.price)}
-                    style={{ marginLeft: '3px' }}
+                    style={{ marginLeft: '4px' }}
                   >
                     <i className="fas fa-dollar-sign" style={{ marginRight: '8px' }}></i>Sold
                   </Button>
