@@ -421,13 +421,13 @@ const handleSaleAmountChange = (e) => {
                     onClick={() => handleSold(pack.id, pack.price)}
                     style={{ marginLeft: '4px' }}
                   >
-                    <i className="fas fa-dollar-sign" style={{ marginRight: '8px' }}></i>Sold
+                    <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i>Sold
                   </Button>
                   <Button
                     variant="primary"
                     onClick={() => handleAddImages(pack.id)}
                   >
-                    <i className="fas fa-image"></i> Add Images
+                    <i className="fas fa-image"style={{ marginRight: '4px' }}></i> Add Images
                   </Button>
                 </CTableDataCell>
               </CTableRow>
