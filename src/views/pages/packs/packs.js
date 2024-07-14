@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { AiOutlineDelete } from 'react-icons/ai';  // Importing delete icon from React-icons (example)
+
 import {
   CCard,
   CCardBody,
@@ -350,7 +352,8 @@ const handleSaleAmountChange = (e) => {
         <CTable align="middle" className="mb-0 border" hover responsive>
           <CTableHead className="text-nowrap">
             <CTableRow>
-              <CTableHeaderCell className="bg-body-tertiary">Brands</CTableHeaderCell>
+            <CTableHeaderCell className="bg-body-tertiary">Brands Ids</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Brands Names</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Status</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Items</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Images</CTableHeaderCell>
@@ -378,19 +381,22 @@ const handleSaleAmountChange = (e) => {
           <CTableBody>
           {filteredPacks.map((pack, index) => (
               <CTableRow key={index}>
+                <CTableDataCell>{pack.id}</CTableDataCell>
                 <CTableDataCell>{pack.brand}</CTableDataCell>
                 <PackStatusCell status={pack.status} />
                 <CTableDataCell>
                   {pack.items.map((item, idx) => (
-                    <div key={idx} className='mt-2'>
-                      {item.name}
+                    <div key={idx} style={{ marginTop: '10px', display: 'flex', alignItems: 'center' }}>
+                      <div style={{ flex: 1, textAlign: 'center' }}>
+                        <span style={{ verticalAlign: 'middle' }}>{item.name}</span>
+                      </div>
                       <Button
                         variant="outline-danger"
                         size="sm"
                         onClick={() => handleDeleteItem(item.id)}
-                        className="ms-4"
+                        style={{ marginLeft: '15px' }}
                       >
-                        Delete
+                        <AiOutlineDelete /> {/* Delete icon */}
                       </Button>
                     </div>
                   ))}
@@ -400,7 +406,7 @@ const handleSaleAmountChange = (e) => {
                     variant="primary"
                     onClick={() => handleShowImages(pack.images)}
                   >
-                     <i className="fas fa-image" style={{ marginRight: '8px' }}></i> View Images
+                     <i className="fas fa-image" style={{ marginRight: '2px' }}></i>
                   </Button>
                 </CTableDataCell>
                 <CTableDataCell>{pack.price}</CTableDataCell>

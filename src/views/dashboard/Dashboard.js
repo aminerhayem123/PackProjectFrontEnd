@@ -85,7 +85,8 @@ const Dashboard = ({ handleLogout }) => {
           <CTable align="middle" className="mb-0 border" hover responsive>
             <CTableHead className="text-nowrap">
               <CTableRow>
-                <CTableHeaderCell className="bg-body-tertiary">Brands</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Brands Ids</CTableHeaderCell>
+                <CTableHeaderCell className="bg-body-tertiary">Brands Names</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary">Items</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('price')}>
                   Price
@@ -111,6 +112,7 @@ const Dashboard = ({ handleLogout }) => {
             <CTableBody>
               {sortedPacks.map((pack, index) => (
                 <CTableRow key={index}>
+                  <CTableDataCell>{pack.id}</CTableDataCell>
                   <CTableDataCell>{pack.brand}</CTableDataCell>
                   <CTableDataCell >
                     {pack.items.map((item, idx) => (
