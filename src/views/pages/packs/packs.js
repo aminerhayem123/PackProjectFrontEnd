@@ -426,6 +426,7 @@ const handleSaleAmountChange = (e) => {
                   <Button
                     variant="primary"
                     onClick={() => handleAddImages(pack.id)}
+                    style={{ marginLeft: '4px' }}
                   >
                     <i className="fas fa-image"style={{ marginRight: '4px' }}></i> Add Images
                   </Button>
