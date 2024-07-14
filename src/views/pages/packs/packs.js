@@ -382,7 +382,7 @@ const handleSaleAmountChange = (e) => {
                 <PackStatusCell status={pack.status} />
                 <CTableDataCell>
                   {pack.items.map((item, idx) => (
-                    <div key={idx} className='mt-2'>
+                    <div key={idx} className='mt-5'>
                       {item.name}
                       <Button
                         variant="outline-danger"
