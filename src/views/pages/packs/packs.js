@@ -511,6 +511,7 @@ const handleSaleAmountChange = (e) => {
           required
         />
       </Form.Group>
+      <br></br>
       <Form.Group controlId="formItems">
         <Form.Label>Items</Form.Label>
         {formData.items.map((item, index) => (
@@ -542,8 +543,8 @@ const handleSaleAmountChange = (e) => {
         <Button variant="outline-primary" onClick={handleAddItem}>
           Add Item
         </Button>
-        <br></br>
       </Form.Group>
+      <br></br>
       <Form.Group controlId="formImages">
         <Form.Label>Images</Form.Label>
         <div style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center', cursor: 'pointer', marginTop: '10px' }} {...getRootProps({ className: 'dropzone' })}>
@@ -589,6 +590,7 @@ const handleSaleAmountChange = (e) => {
                 required
               />
             </Form.Group>
+            <br></br>
             <Button variant="primary" type="submit">
               Add Item
             </Button>

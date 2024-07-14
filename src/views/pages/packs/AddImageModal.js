@@ -80,11 +80,11 @@ const AddImageModal = ({ show, onHide, packId, handleShowModal }) => {
                       <img src={image.preview} alt={`Preview-${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '5px' }} />
                     </div>
                   ))}
-                  <br></br>
                 </div>
               }
             </div>
           </Form.Group>
+          <br></br>
           <Button variant="primary" type="submit" disabled={images.length === 0}>
             Save
           </Button>
