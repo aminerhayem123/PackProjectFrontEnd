@@ -13,11 +13,13 @@ import {
   CInputGroup,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPrint } from '@fortawesome/free-solid-svg-icons';
-import jsPDF from 'jspdf';
+import { faTrash, faPrint, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import jsPDF from 'jspdf';
+import ReactPaginate from 'react-paginate';
+import '../items/items.css';
 
 const Transactions = ({ hideActions, hideSearch }) => {
   const [transactions, setTransactions] = useState([]);
@@ -27,7 +29,9 @@ const Transactions = ({ hideActions, hideSearch }) => {
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [items, setItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     fetchTransactions();
   }, []);
@@ -78,6 +82,7 @@ const Transactions = ({ hideActions, hideSearch }) => {
     );
 
     setFilteredTransactions(filtered);
+    setCurrentPage(0);
   };
 
   const handlePrint = (transaction) => {
@@ -112,7 +117,7 @@ const Transactions = ({ hideActions, hideSearch }) => {
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    setPasswordError(''); // Clear any previous error on input change
+    setPasswordError('');
   };
 
   const deleteTransaction = async () => {
@@ -121,33 +126,30 @@ const Transactions = ({ hideActions, hideSearch }) => {
         console.error('TransactionToDelete or its ID is undefined');
         return;
       }
-  
+
       const response = await fetch(`http://localhost:5000/transactions/${transactionToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }), // Assuming 'password' state is set correctly
+        body: JSON.stringify({ password }),
       });
-  
+
       if (!response.ok) {
-        // Handle error response codes
         if (response.status === 401) {
           const errorResponse = await response.json();
-          setPasswordError(errorResponse.message); // Display specific error message from backend
+          setPasswordError(errorResponse.message);
         } else {
           throw new Error('Network response was not ok');
         }
       } else {
-        const result = await response.json(); // Assuming backend returns a result
+        const result = await response.json();
         if (result.success) {
-          // Update state or perform necessary actions after successful deletion
           const updatedTransactions = transactions.filter(t => t.id !== transactionToDelete.id);
           setTransactions(updatedTransactions);
           setFilteredTransactions(updatedTransactions);
           setShowModal(false);
         } else {
-          // Handle other scenarios based on backend response
           console.error('Error deleting transaction:', result.message);
         }
       }
@@ -155,23 +157,30 @@ const Transactions = ({ hideActions, hideSearch }) => {
       console.error('Error deleting transaction:', error);
     }
   };
-  
+
+  const offset = currentPage * itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(offset, offset + itemsPerPage);
+  const pageCount = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
 
   return (
     <CCard className="mb-4">
       <CCardHeader>Transactions</CCardHeader>
       <CCardBody>
-      {!hideSearch && (
-        <CInputGroup className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by Sale Date, Amount, or Profit"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-        </CInputGroup>
-          )}
+        {!hideSearch && (
+          <CInputGroup className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by Sale Date, Amount, or Profit"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </CInputGroup>
+        )}
         <CTable align="middle" className="mb-0 border" hover responsive>
           <CTableHead className="text-nowrap">
             <CTableRow>
@@ -184,7 +193,7 @@ const Transactions = ({ hideActions, hideSearch }) => {
             </CTableRow>
           </CTableHead>
           <CTableBody>
-            {filteredTransactions.map((transaction) => (
+            {currentTransactions.map((transaction) => (
               <CTableRow key={transaction.id}>
                 <CTableDataCell>{transaction.id}</CTableDataCell>
                 <CTableDataCell>{transaction.pack_id}</CTableDataCell>
@@ -192,19 +201,36 @@ const Transactions = ({ hideActions, hideSearch }) => {
                 <CTableDataCell>{transaction.amount}</CTableDataCell>
                 <CTableDataCell>{transaction.profit}</CTableDataCell>
                 {!hideActions && (
-                <CTableDataCell>
-                  <CButton color="danger" onClick={() => openModal(transaction)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </CButton>
-                  <CButton color="info" className="ml-2" onClick={() => handlePrint(transaction)}>
-                    <FontAwesomeIcon icon={faPrint} />
-                  </CButton>
-                </CTableDataCell>
-                 )}
+                  <CTableDataCell>
+                    <CButton color="danger" onClick={() => openModal(transaction)}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </CButton>
+                    <CButton color="info" className="ml-2" onClick={() => handlePrint(transaction)}>
+                      <FontAwesomeIcon icon={faPrint} />
+                    </CButton>
+                  </CTableDataCell>
+                )}
               </CTableRow>
             ))}
           </CTableBody>
         </CTable>
+
+        {/* Pagination aligned to the right */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '15px' }}>
+          <ReactPaginate
+            previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+            nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+            breakLabel={'...'}
+            breakClassName={'break-me'}
+            pageCount={pageCount}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageClick}
+            containerClassName={'pagination'}
+            subContainerClassName={'pages pagination'}
+            activeClassName={'active'}
+          />
+        </div>
 
         {/* Modal for delete confirmation */}
         <Modal show={showModal} onHide={handleCloseModal}>
@@ -216,18 +242,20 @@ const Transactions = ({ hideActions, hideSearch }) => {
             <Form.Group controlId="password">
               <Form.Label>Password</Form.Label>
               <Form.Control
-                type="text" // Use password type for secure input
+                type="text"
+                placeholder="Enter your password"
                 value={password}
                 onChange={handlePasswordChange}
-                placeholder="Enter your password..."
-                isInvalid={passwordError !== ''}
+                className={passwordError ? 'is-invalid' : ''}
               />
-              <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
+              {passwordError && (
+                <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
+              )}
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
-              Close
+              Cancel
             </Button>
             <Button variant="danger" onClick={deleteTransaction}>
               Delete
