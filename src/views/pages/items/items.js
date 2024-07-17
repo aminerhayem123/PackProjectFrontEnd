@@ -13,20 +13,23 @@ import {
   CInputGroup,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import avatar from 'src/assets/images/avatars/1.jpg';
+import ReactPaginate from 'react-paginate';
+import './items.css';
 
 const Items = () => {
   const [items, setItems] = useState([]);
-  const [filteredItems, setFilteredItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
   const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(null); // State for password error
+  const [passwordError, setPasswordError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchItems();
@@ -44,7 +47,6 @@ const Items = () => {
         avatar,
       }));
       setItems(itemsWithAvatars);
-      setFilteredItems(itemsWithAvatars);
     } catch (error) {
       console.error('Error fetching items:', error);
     }
@@ -57,58 +59,62 @@ const Items = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }), // Pass password in the request body
+        body: JSON.stringify({ password }),
       });
-  
+
       if (!response.ok) {
-        // Check if response status is 401 (Unauthorized)
         if (response.status === 401) {
           setPasswordError('Incorrect password. Please try again.');
         } else {
           throw new Error('Network response was not ok');
         }
       }
-  
-      const result = await response.json(); // Assuming backend returns a result
+
+      const result = await response.json();
       if (result.success) {
         setItems(items.filter(item => item.id !== itemIdToDelete));
-        setFilteredItems(filteredItems.filter(item => item.id !== itemIdToDelete));
         setShowModal(false);
         window.location.reload();
       } else {
-        // Handle other scenarios based on backend response
         console.error('Error deleting item:', result.message);
       }
     } catch (error) {
       console.error('Error deleting item:', error);
     }
   };
-  
+
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    const filtered = items.filter(item =>
-      item.id.toString().toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredItems(filtered);
+    setSearchQuery(e.target.value);
+    setCurrentPage(0); // Reset to the first page when searching
   };
 
   const handleOpenModal = (id) => {
     setItemIdToDelete(id);
     setShowModal(true);
-    setPassword(''); // Clear password input when opening modal
-    setPasswordError(null); // Clear password error message
+    setPassword('');
+    setPasswordError(null);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setPassword(''); // Clear password input when closing modal
-    setPasswordError(null); // Clear password error message
+    setPassword('');
+    setPasswordError(null);
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
+
+  const handlePageClick = (data) => {
+    setCurrentPage(data.selected);
+  };
+
+  const filteredItems = items.filter(item =>
+    item.id.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const offset = currentPage * itemsPerPage;
+  const currentItems = filteredItems.slice(offset, offset + itemsPerPage);
 
   return (
     <CCard className="mb-4">
@@ -133,7 +139,7 @@ const Items = () => {
             </CTableRow>
           </CTableHead>
           <CTableBody>
-            {filteredItems.map((item) => (
+            {currentItems.map((item) => (
               <CTableRow key={item.id}>
                 <CTableDataCell>{item.id}</CTableDataCell>
                 <CTableDataCell>{item.pack_id}</CTableDataCell>
@@ -146,6 +152,22 @@ const Items = () => {
             ))}
           </CTableBody>
         </CTable>
+
+        <div className="pagination-container">
+          <ReactPaginate
+            previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+            nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+            breakLabel={'...'}
+            breakClassName={'break-me'}
+            pageCount={Math.ceil(filteredItems.length / itemsPerPage)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageClick}
+            containerClassName={'pagination'}
+            subContainerClassName={'pages pagination'}
+            activeClassName={'active'}
+          />
+        </div>
 
         <Modal show={showModal} onHide={handleCloseModal}>
           <Modal.Header closeButton>
@@ -160,7 +182,7 @@ const Items = () => {
                 value={password}
                 onChange={handlePasswordChange}
                 placeholder="Enter your password..."
-                isInvalid={passwordError} // Highlight input if there's a password error
+                isInvalid={passwordError}
               />
               <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
             </Form.Group>
