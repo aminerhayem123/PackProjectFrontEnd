@@ -23,7 +23,7 @@ const WidgetsDropdown = (props) => {
   useEffect(() => {
     const fetchPackCount = async () => {
       try {
-        const response = await fetch('https://packprojectbackend-production.up.railway.app/packs/count');
+        const response = await fetch('http://localhost:5000/packs/count');
         if (!response.ok) {
           throw new Error('Failed to fetch pack count');
         }
@@ -42,7 +42,7 @@ const WidgetsDropdown = (props) => {
   useEffect(() => {
     const fetchPackSold = async () => {
       try {
-        const response = await fetch('https://packprojectbackend-production.up.railway.app/packs/Sold');
+        const response = await fetch('http://localhost:5000/packs/Sold');
         if (!response.ok) {
           throw new Error('Failed to fetch pack count');
         }
@@ -62,7 +62,7 @@ const WidgetsDropdown = (props) => {
    useEffect(() => {
     const fetchProfitData = async () => {
       try {
-        const response = await fetch('https://packprojectbackend-production.up.railway.app/transactions/profits');
+        const response = await fetch('http://localhost:5000/transactions/profits');
         if (!response.ok) {
           throw new Error('Failed to fetch profit data');
         }
