@@ -15,6 +15,7 @@ import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import WidgetsDropdown from '../widgets/WidgetsDropdown';
 import PackStatusCell from '../pages/packs/PackStatusCell'; // Adjust the path as per your folder structure
+import Transactions from '../pages/Transactions/Transactions'; // Adjust the path as per your folder structure
 
 const Dashboard = ({ handleLogout }) => {
   const [packs, setPacks] = useState([]);
@@ -28,7 +29,7 @@ const Dashboard = ({ handleLogout }) => {
 
   const fetchPacks = async () => {
     try {
-      const response = await axios.get('https://packprojectbackend-production.up.railway.app/packs');
+      const response = await axios.get('http://localhost:5000/packs');
       setPacks(response.data);
     } catch (error) {
       console.error('Error fetching packs:', error);
@@ -80,14 +81,15 @@ const Dashboard = ({ handleLogout }) => {
     <>
       <WidgetsDropdown className="mb-4" />
       <CCard className="mb-4">
-      <CCardHeader>Packs</CCardHeader>
+        <CCardHeader>Packs</CCardHeader>
         <CCardBody>
           <CTable align="middle" className="mb-0 border" hover responsive>
             <CTableHead className="text-nowrap">
               <CTableRow>
               <CTableHeaderCell className="bg-body-tertiary">Brands Ids</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary">Brands Names</CTableHeaderCell>
-                <CTableHeaderCell className="bg-body-tertiary">Items</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Brands Names</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Category</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Number of Items</CTableHeaderCell>
                 <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('price')}>
                   Price
                   {sortConfig.key === 'price' && (
@@ -114,11 +116,15 @@ const Dashboard = ({ handleLogout }) => {
                 <CTableRow key={index}>
                   <CTableDataCell>{pack.id}</CTableDataCell>
                   <CTableDataCell>{pack.brand}</CTableDataCell>
-                  <CTableDataCell >
-                    {pack.items.map((item, idx) => (
-                      <div key={idx}>{item.name}</div>
-                    ))}
-                  </CTableDataCell>
+                  <CTableDataCell>{pack.category}</CTableDataCell>
+                  <CTableDataCell>{pack.number_of_items !== null ? (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>{pack.number_of_items} items</span>
+                      </div>
+                    ) : (
+                      <span>No items</span>
+                    )}
+                </CTableDataCell>
                   <CTableDataCell>{pack.price}</CTableDataCell>
                   <CTableDataCell>{formatDate(new Date(pack.created_date))}</CTableDataCell>
                   <PackStatusCell status={pack.status} />
@@ -128,8 +134,9 @@ const Dashboard = ({ handleLogout }) => {
           </CTable>
         </CCardBody>
       </CCard>
-
       
+      {/* Transactions Table */}
+      <Transactions hideActions={true} hideSearch={true} />
     </>
   );
 };

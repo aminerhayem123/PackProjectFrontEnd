@@ -35,7 +35,7 @@ const App = () => {
 
   const handleLogin = async (email, password) => {
     try {
-      const response = await fetch('https://packprojectbackend-production.up.railway.app/login', {
+      const response = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

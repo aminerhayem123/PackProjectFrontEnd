@@ -19,6 +19,8 @@ import {
   Image,
   Row,
   Col,
+  Dropdown, 
+  ButtonGroup,
 } from 'react-bootstrap';
 import PackStatusCell from './PackStatusCell';
 import { useDropzone } from 'react-dropzone';
@@ -33,12 +35,24 @@ import avatar1 from 'src/assets/images/avatars/1.jpg';
 
 const Packs = () => {
   const formatDate = (date) => {
-    const options = {
-      year: 'numeric', month: 'numeric', day: 'numeric',
-      hour: 'numeric', minute: 'numeric', second: 'numeric',
-      hour12: false // Use 24-hour format
+    // Format options for date and time
+    const optionsDate = {
+      day: '2-digit', // Two-digit day (01, 02, ..., 31)
+      month: '2-digit', // Two-digit month (01, 02, ..., 12)
+      year: '2-digit' // Two-digit year (e.g., 21 for 2021)
     };
-    return date.toLocaleString(undefined, options);
+
+    const optionsTime = {
+      hour: '2-digit', // Two-digit hour (00 through 23)
+      minute: '2-digit' // Two-digit minute (00 through 59)
+    };
+
+    // Format date and time separately
+    const formattedDate = date.toLocaleString('en-GB', optionsDate);
+    const formattedTime = date.toLocaleString('en-US', optionsTime); // Adjust locale as needed
+
+    // Concatenate date and time with a hyphen
+    return `${formattedDate} - ${formattedTime}`;
   };
   const [showModal, setShowModal] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
@@ -53,12 +67,14 @@ const Packs = () => {
   const [selectedPackId, setSelectedPackId] = useState(null);
   const [selectedPackPrice, setSelectedPackPrice] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [formData, setFormData] = useState({
     brand: '',
     numberOfItems: 1,
-    items: [''],
     images: [],
-    price: ''
+    price: '',
+    category: '',
   });
   const [newItemData, setNewItemData] = useState({
     packId: '',
@@ -68,17 +84,50 @@ const Packs = () => {
 
    useEffect(() => {
     fetchPacks();
+    fetchCategories();
   }, []);
 
   const fetchPacks = async () => {
     try {
-      const response = await axios.get('https://packprojectbackend-production.up.railway.app/packs');
+      const response = await axios.get('http://localhost:5000/packs');
       setPacks(response.data);
     } catch (error) {
       console.error('Error fetching packs:', error);
     }
   };
-  
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/categories');
+      const categoriesData = response.data;
+
+      setCategories(categoriesData); // Assuming categoriesData is an array of strings
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const handleFormChangeCat = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+
+    // Always show dropdown if there are categories available
+    if (value.trim() === '') {
+      setShowDropdown(true); // Show dropdown if input is empty
+    } else {
+      setShowDropdown(categories.includes(value)); // Show dropdown if category exists
+    }
+  };
+  const handleFocus = () => {
+    setShowDropdown(true);
+  };
+
+  const handleBlur = () => {
+    setShowDropdown(false);
+  };
   const handleSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -143,23 +192,20 @@ const Packs = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const data = new FormData();
     data.append('brand', formData.brand);
     data.append('price', formData.price);
-  
-    // Append items as an array of strings
-    formData.items.forEach((item, index) => {
-      data.append('items', item); // Assuming 'item' is a string
-    });
-  
+    data.append('numberOfItems', formData.numberOfItems);
+    data.append('category', formData.category);
+
     // Append images as files
     formData.images.forEach((image, index) => {
       data.append('images', image); // Assuming 'image' is a File object
     });
-  
+
     try {
-      const response = await axios.post('https://packprojectbackend-production.up.railway.app/packs', data, {
+      const response = await axios.post('http://localhost:5000/packs', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -167,18 +213,17 @@ const Packs = () => {
       window.location.reload();
       console.log('Pack creation response:', response.data);
       fetchPacks(); // Update pack list
-      setShowForm(false); // Hide the form after successful submission
       setFormData({
         brand: '',
         numberOfItems: 1,
-        items: [''],
         images: [],
-        price: '' // Clear price input
+        price: '',
+        category: '' // Clear category input
       });
     } catch (error) {
       console.error('Error creating pack:', error);
     }
-  };  
+  };
 
   const handleAddNewItem = async (e) => {
     e.preventDefault();
@@ -190,7 +235,7 @@ const Packs = () => {
       }
   
       // Send the POST request to add a new item
-      await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${newItemData.packId}/items`, { name: newItemData.name });
+      await axios.post(`http://localhost:5000/packs/${newItemData.packId}/items`, { name: newItemData.name });
       window.location.reload();
       // Refresh the packs list after adding the new item
       fetchPacks();
@@ -206,7 +251,7 @@ const Packs = () => {
 
   const handleDeleteItem = async (itemId) => {
     try {
-      await axios.delete(`https://packprojectbackend-production.up.railway.app/items/${itemId}`);
+      await axios.delete(`http://localhost:5000/items/${itemId}`);
       fetchPacks(); // Refresh the list after deletion
       window.location.reload();
     } catch (error) {
@@ -237,7 +282,7 @@ const Packs = () => {
 
   const handleDeleteSelectedImages = async () => {
     try {
-      await axios.delete(`https://packprojectbackend-production.up.railway.app/images/delete`, {
+      await axios.delete(`http://localhost:5000/images/delete`, {
         data: { imageIds: selectedImageIds }, // Pass array of selected image IDs to delete
       });
   
@@ -293,7 +338,7 @@ const Packs = () => {
     const profit = saleAmount - selectedPackPrice;
   
     try {
-      const response = await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${selectedPackId}/sold`, {
+      const response = await axios.post(`http://localhost:5000/packs/${selectedPackId}/sold`, {
         amount: saleAmount,
         profit: profit,
       });
@@ -354,8 +399,9 @@ const handleSaleAmountChange = (e) => {
             <CTableRow>
             <CTableHeaderCell className="bg-body-tertiary">Brands Ids</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Brands Names</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Category</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Status</CTableHeaderCell>
-              <CTableHeaderCell className="bg-body-tertiary">Items</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary">Number of Items</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Images</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('price')}>
                 Price
@@ -383,23 +429,15 @@ const handleSaleAmountChange = (e) => {
               <CTableRow key={index}>
                 <CTableDataCell>{pack.id}</CTableDataCell>
                 <CTableDataCell>{pack.brand}</CTableDataCell>
+                <CTableDataCell>{pack.category}</CTableDataCell>
                 <PackStatusCell status={pack.status} />
-                <CTableDataCell>
-                  {pack.items.map((item, idx) => (
-                    <div key={idx} style={{ marginTop: '10px', display: 'flex', alignItems: 'center' }}>
-                      <div style={{ flex: 1, textAlign: 'center' }}>
-                        <span style={{ verticalAlign: 'middle' }}>{item.name}</span>
+                <CTableDataCell>{pack.number_of_items !== null ? (
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span>{pack.number_of_items} items</span>
                       </div>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDeleteItem(item.id)}
-                        style={{ marginLeft: '15px' }}
-                      >
-                        <AiOutlineDelete /> {/* Delete icon */}
-                      </Button>
-                    </div>
-                  ))}
+                    ) : (
+                      <span>No items</span>
+                    )}
                 </CTableDataCell>
                 <CTableDataCell>
                   <Button
@@ -412,30 +450,28 @@ const handleSaleAmountChange = (e) => {
                 <CTableDataCell>{pack.price}</CTableDataCell>
                 <CTableDataCell>{formatDate(new Date(pack.created_date))}</CTableDataCell>
                 <CTableDataCell>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setNewItemData({ packId: pack.id, name: '' });
-                      setShowItemForm(true);
-                    }}
-                    style={{ marginLeft: '3px' }}
-                  >
-                    <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleSold(pack.id, pack.price)}
-                    style={{ marginLeft: '4px' }}
-                  >
-                    <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i>Sold
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleAddImages(pack.id)}
-                    style={{ marginLeft: '4px' }}
-                  >
-                    <i className="fas fa-image"style={{ marginRight: '4px' }}></i> Add Images
-                  </Button>
+                  <Dropdown as={ButtonGroup} style={{ marginLeft: '4px' }}>
+                    <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                      <i className="fas fa-ellipsis-v"></i>
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      <Dropdown.Item
+                        onClick={() => {
+                          setNewItemData({ packId: pack.id, name: '' });
+                          setShowItemForm(true);
+                        }}
+                      >
+                        <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => handleSold(pack.id, pack.price)}>
+                        <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i> Sold
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => handleAddImages(pack.id)}>
+                        <i className="fas fa-image" style={{ marginRight: '4px' }}></i> Add Images
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </CTableDataCell>
               </CTableRow>
             ))}
@@ -444,7 +480,6 @@ const handleSaleAmountChange = (e) => {
         </CCardBody>
       </CCard>
       {/* Modal Add Images */}
-
       <AddImageModal
         show={showModal}
         onHide={handleCloseModal}
@@ -479,107 +514,106 @@ const handleSaleAmountChange = (e) => {
       </Modal>
 
       {/* Add Pack Modal */}
-      <Modal show={showForm} onHide={() => setShowForm(false)}>
-  <Modal.Header closeButton>
-    <Modal.Title>Add Pack</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    <Form onSubmit={handleSubmit}>
-      <Form.Group controlId="formBrand">
-        <Form.Label>Brand</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Enter brand"
-          name="brand"
-          value={formData.brand}
-          onChange={handleFormChange}
-          required
-        />
-        <br></br>
-      </Form.Group>
-      <Form.Group controlId="formPrice">
-        <Form.Label>Price</Form.Label>
-        <Form.Control
-          type="number"
-          placeholder="Enter price"
-          name="price"
-          value={formData.price}
-          onChange={handleFormChange}
-          required
-        />
-        <br></br>
-      </Form.Group>
-      <Form.Group controlId="formNumberOfItems">
-        <Form.Label>Number of Items</Form.Label>
-        <Form.Control
-          type="number"
-          placeholder="Enter number of items"
-          name="numberOfItems"
-          value={formData.numberOfItems}
-          onChange={handleFormChange}
-          required
-        />
-      </Form.Group>
-      <br></br>
-      <Form.Group controlId="formItems">
-        <Form.Label>Items</Form.Label>
-        {formData.items.map((item, index) => (
-          <div key={index} className="mb-2 d-flex align-items-center">
+    <Modal show={showForm} onHide={() => setShowForm(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Pack</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group controlId="formBrand">
+            <Form.Label>Brand</Form.Label>
             <Form.Control
               type="text"
-              placeholder={`Item ${index + 1}`}
-              value={item}
-              onChange={(e) => handleItemChange(index, e.target.value)}
+              placeholder="Enter brand"
+              name="brand"
+              value={formData.brand}
+              onChange={handleFormChange}
               required
-              style={{ marginRight: '10px' }}
             />
-            <Button
-              variant="outline-danger"
-              onClick={() => {
-                const newItems = [...formData.items];
-                newItems.splice(index, 1);
-                setFormData({
-                  ...formData,
-                  items: newItems,
-                });
-              }}
-              className="align-self-start"
+            <br />
+          </Form.Group>
+          <Form.Group controlId="formPrice">
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter price"
+              name="price"
+              value={formData.price}
+              onChange={handleFormChange}
+              required
+            />
+            <br />
+          </Form.Group>
+          <Form.Group controlId="formNumberOfItems">
+            <Form.Label>Number of Items</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter number of items"
+              name="numberOfItems"
+              value={formData.numberOfItems}
+              onChange={handleFormChange}
+              required
+            />
+            <br />
+          </Form.Group>
+          <Form.Group controlId="formCategory">
+            <Form.Label>Category</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter category"
+              name="category"
+              value={formData.category}
+              onChange={handleFormChangeCat}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              list="categoryDropdown"
+              required
+            />
+            {showDropdown && (
+              <datalist id="categoryDropdown">
+                {categories.map((cat, index) => (
+                  <option key={index} value={cat} />
+                ))}
+              </datalist>
+            )}
+         </Form.Group>
+          <br />
+          <Form.Group controlId="formImages">
+            <Form.Label>Images</Form.Label>
+            <div
+              style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center', cursor: 'pointer', marginTop: '10px' }}
+              {...getRootProps({ className: 'dropzone' })}
             >
-              <Trash />
-            </Button>
-          </div>
-        ))}
-        <Button variant="outline-primary" onClick={handleAddItem}>
-          Add Item
-        </Button>
-      </Form.Group>
-      <br></br>
-      <Form.Group controlId="formImages">
-        <Form.Label>Images</Form.Label>
-        <div style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center', cursor: 'pointer', marginTop: '10px' }} {...getRootProps({ className: 'dropzone' })}>
-          <input {...getInputProps()} />
-          <p>Import Pictures</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '10px' }}>
-            {formData.images.map((file, index) => (
-              <div key={index} style={{ width: '100px', height: '100px', marginRight: '10px', marginBottom: '10px', position: 'relative' }}>
-                <img src={URL.createObjectURL(file)} alt={`Preview-${index}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '5px' }} />
+              <input {...getInputProps()} />
+              <p>Import Pictures</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '10px' }}>
+                {formData.images.map((file, index) => (
+                  <div
+                    key={index}
+                    style={{ width: '100px', height: '100px', marginRight: '10px', marginBottom: '10px', position: 'relative' }}
+                  >
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview-${index}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '5px' }}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {formData.images.length > 0 && (
-            <Button variant="outline-danger" onClick={() => setFormData({ ...formData, images: [] })} style={{ marginTop: '10px' }}>
-              Clear Images
-            </Button>
-          )}
-        </div>
-      </Form.Group>
-      <br></br>
-      <Button variant="primary" type="submit">
-        Submit
-      </Button>
-    </Form>
-  </Modal.Body>
-</Modal>
+              {formData.images.length > 0 && (
+                <Button variant="outline-danger" onClick={() => setFormData({ ...formData, images: [] })} style={{ marginTop: '10px' }}>
+                  Clear Images
+                </Button>
+              )}
+            </div>
+          </Form.Group>
+          <br />
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
 
 
       {/* Add Item Modal */}
