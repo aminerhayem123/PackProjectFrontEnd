@@ -450,29 +450,30 @@ const handleSaleAmountChange = (e) => {
                 <CTableDataCell>{pack.price}</CTableDataCell>
                 <CTableDataCell>{formatDate(new Date(pack.created_date))}</CTableDataCell>
                 <CTableDataCell>
-                  <Dropdown as={ButtonGroup} style={{ marginLeft: '4px' }}>
-                    <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                      <i className="fas fa-ellipsis-v"></i>
-                    </Dropdown.Toggle>
+                    <Dropdown as={ButtonGroup} style={{ marginLeft: '4px' }} drop="end">
+                      <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                        <i className="fas fa-ellipsis-v"></i>
+                      </Dropdown.Toggle>
 
-                    <Dropdown.Menu>
-                      <Dropdown.Item
-                        onClick={() => {
-                          setNewItemData({ packId: pack.id, name: '' });
-                          setShowItemForm(true);
-                        }}
-                      >
-                        <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => handleSold(pack.id, pack.price)}>
-                        <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i> Sold
-                      </Dropdown.Item>
-                      <Dropdown.Item onClick={() => handleAddImages(pack.id)}>
-                        <i className="fas fa-image" style={{ marginRight: '4px' }}></i> Add Images
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </CTableDataCell>
+                      <Dropdown.Menu>
+                        <Dropdown.Item
+                          onClick={() => {
+                            setNewItemData({ packId: pack.id, name: '' });
+                            setShowItemForm(true);
+                          }}
+                        >
+                          <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleSold(pack.id, pack.price)}>
+                          <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i> Sold
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleAddImages(pack.id)}>
+                          <i className="fas fa-image" style={{ marginRight: '4px' }}></i> Add Images
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </CTableDataCell>
+
               </CTableRow>
             ))}
           </CTableBody>
