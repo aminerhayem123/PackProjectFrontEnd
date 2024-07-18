@@ -232,40 +232,38 @@ const Packs = ({ hideActions, hideSearch }) => {
     }
   };
 
-  const handleAddNewItem = async (e) => {
+  const handleUpdatePack = async (e) => {
     e.preventDefault();
     try {
-      // Ensure newItemData.packId is set correctly before proceeding
-      if (!newItemData.packId) {
+      // Ensure newItemData.id is set correctly before proceeding
+      if (!newItemData.id) {
         console.error('Pack ID is missing.');
         return;
       }
   
-      // Send the POST request to add a new item
-      await axios.post(`http://localhost:5000/packs/${newItemData.packId}/items`, { name: newItemData.name });
-      window.location.reload();
-      // Refresh the packs list after adding the new item
-      fetchPacks();
-      
+      // Send the PUT request to update the pack details
+      await axios.put(`http://localhost:5000/packs/${newItemData.id}`, {
+        brand: newItemData.brand,
+        category: newItemData.category,
+        number_of_items: newItemData.number_of_items,
+        price: newItemData.price
+      });
+      // Refresh the packs list after updating the pack
+      window.location.reload();  
       // Reset the form and modal state
       setShowItemForm(false);
-      setNewItemData({ packId: '', name: '' });
+      setNewItemData({
+        id: '',
+        brand: '',
+        category: '',
+        number_of_items: '',
+        price: ''
+      });
     } catch (error) {
-      console.error('Error adding new item:', error);
+      console.error('Error updating pack:', error);
     }
-  };
+  };  
   
-
-  const handleDeleteItem = async (itemId) => {
-    try {
-      await axios.delete(`http://localhost:5000/items/${itemId}`);
-      fetchPacks(); // Refresh the list after deletion
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
-  };
-
   const handleShowImages = (images) => {
     setModalImages(images);
     setShowImageModal(true);
@@ -491,14 +489,21 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                       </Dropdown.Toggle>
 
                       <Dropdown.Menu>
-                        <Dropdown.Item
-                          onClick={() => {
-                            setNewItemData({ packId: pack.id, name: '' });
-                            setShowItemForm(true);
-                          }}
-                        >
-                          <i className="fas fa-plus" style={{ marginRight: '4px' }}></i> Add Item
-                        </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => {
+                          setNewItemData({
+                            id: pack.id,
+                            brand: pack.brand || '',
+                            name: pack.name || '',
+                            category: pack.category || '',
+                            number_of_items: pack.number_of_items || '',
+                            price: pack.price || ''
+                          });
+                          setShowItemForm(true);
+                        }}
+                      >
+                        <i className="fas fa-edit" style={{ marginRight: '4px' }}></i> Modify Pack
+                      </Dropdown.Item>
                         <Dropdown.Item onClick={() => handleSold(pack.id, pack.price)}>
                           <i className="fas fa-dollar-sign" style={{ marginRight: '4px' }}></i> Sold
                         </Dropdown.Item>
@@ -667,30 +672,61 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
     </Modal>
 
 
-      {/* Add Item Modal */}
+      {/* Modify Pack Modal */}
       <Modal show={showItemForm} onHide={() => setShowItemForm(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Add Item</Modal.Title>
+          <Modal.Title>Modify Pack</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleAddNewItem}>
-            <Form.Group controlId="formItemName">
-              <Form.Label>Item Name</Form.Label>
+          <Form onSubmit={handleUpdatePack}>
+            <Form.Group controlId="formPackBrand">
+              <Form.Label>Brand</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter item name"
-                value={newItemData.name}
-                onChange={(e) => setNewItemData({ ...newItemData, name: e.target.value })}
+                placeholder="Enter brand"
+                value={newItemData.brand}
+                onChange={(e) => setNewItemData({ ...newItemData, brand: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPackCategory">
+              <Form.Label>Category</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter category"
+                value={newItemData.category}
+                onChange={(e) => setNewItemData({ ...newItemData, category: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPackNumberOfItems">
+              <Form.Label>Number of Items</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter number of items"
+                value={newItemData.number_of_items}
+                onChange={(e) => setNewItemData({ ...newItemData, number_of_items: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="formPackPrice">
+              <Form.Label>Price</Form.Label>
+              <Form.Control
+                type="number"
+                placeholder="Enter price"
+                value={newItemData.price}
+                onChange={(e) => setNewItemData({ ...newItemData, price: e.target.value })}
                 required
               />
             </Form.Group>
             <br></br>
             <Button variant="primary" type="submit">
-              Add Item
+              Update Pack
             </Button>
           </Form>
         </Modal.Body>
       </Modal>
+
        {/* Modal for marking pack as sold */}
       <Modal show={showSaleModal} onHide={() => setShowSaleModal(false)}>
         <Modal.Header closeButton>
