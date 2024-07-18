@@ -35,7 +35,7 @@ import avatar1 from 'src/assets/images/avatars/1.jpg';
 import ReactPaginate from 'react-paginate';
 import  '../items/items.css';
 
-const Packs = (hideActions, hideSearch ) => {
+const Packs = ({ hideActions, hideSearch }) => {
   const formatDate = (date) => {
     // Format options for date and time
     const optionsDate = {
@@ -404,21 +404,21 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
   return (
     <>
     {!hideSearch && (
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <Button variant="primary" onClick={() => setShowForm(true)} className="mb-2">
-        <i className="fas fa-box"></i> Add Pack
-        </Button>
-          <div className="flex-grow-1 ms-3">
-            <Form.Control
-              type="text"
-              placeholder="Filter by Brand or Pack ID"
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              style={{ width: '250px' }} // Adjust width as needed
-            />
-          </div>
-      </div>
-      )}
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <Button variant="primary" onClick={() => setShowForm(true)} className="mb-2">
+          <i className="fas fa-box"></i> Add Pack
+          </Button>
+            <div className="flex-grow-1 ms-3">
+              <Form.Control
+                type="text"
+                placeholder="Filter by Brand or Pack ID"
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                style={{ width: '250px' }} // Adjust width as needed
+              />
+            </div>
+        </div>
+        )}
       <CCard className="mb-4">
         <CCardHeader>Packs</CCardHeader>
         <CCardBody>
@@ -449,7 +449,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                   />
                 )}
               </CTableHeaderCell>
-              {!hideSearch && (<CTableHeaderCell className="bg-body-tertiary">Actions</CTableHeaderCell>)}
+              { !hideActions && <CTableHeaderCell className="bg-body-tertiary">Actions</CTableHeaderCell> }
             </CTableRow>
           </CTableHead>
           <CTableBody>
@@ -477,7 +477,8 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                 </CTableDataCell>
                 <CTableDataCell>{pack.price}</CTableDataCell>
                 <CTableDataCell>{formatDate(new Date(pack.created_date))}</CTableDataCell>
-                {!hideSearch && ( <CTableDataCell>
+                { !hideActions &&(
+                <CTableDataCell>
                     <Dropdown as={ButtonGroup} style={{ marginLeft: '4px' }} drop="end">
                       <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                         <i className="fas fa-ellipsis-v"></i>
