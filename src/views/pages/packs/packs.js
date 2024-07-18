@@ -35,7 +35,7 @@ import avatar1 from 'src/assets/images/avatars/1.jpg';
 import ReactPaginate from 'react-paginate';
 import  '../items/items.css';
 
-const Packs = () => {
+const Packs = (hideActions, hideSearch ) => {
   const formatDate = (date) => {
     // Format options for date and time
     const optionsDate = {
@@ -403,6 +403,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
 
   return (
     <>
+    {!hideSearch && (
       <div className="d-flex justify-content-between align-items-center mb-2">
         <Button variant="primary" onClick={() => setShowForm(true)} className="mb-2">
         <i className="fas fa-box"></i> Add Pack
@@ -417,6 +418,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
             />
           </div>
       </div>
+      )}
       <CCard className="mb-4">
         <CCardHeader>Packs</CCardHeader>
         <CCardBody>
@@ -447,7 +449,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                   />
                 )}
               </CTableHeaderCell>
-              <CTableHeaderCell className="bg-body-tertiary">Actions</CTableHeaderCell>
+              {!hideSearch && (<CTableHeaderCell className="bg-body-tertiary">Actions</CTableHeaderCell>)}
             </CTableRow>
           </CTableHead>
           <CTableBody>
@@ -475,7 +477,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                 </CTableDataCell>
                 <CTableDataCell>{pack.price}</CTableDataCell>
                 <CTableDataCell>{formatDate(new Date(pack.created_date))}</CTableDataCell>
-                <CTableDataCell>
+                {!hideSearch && ( <CTableDataCell>
                     <Dropdown as={ButtonGroup} style={{ marginLeft: '4px' }} drop="end">
                       <Dropdown.Toggle variant="secondary" id="dropdown-basic">
                         <i className="fas fa-ellipsis-v"></i>
@@ -499,7 +501,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                       </Dropdown.Menu>
                     </Dropdown>
                   </CTableDataCell>
-
+                )}
               </CTableRow>
             ))}
           </CTableBody>
