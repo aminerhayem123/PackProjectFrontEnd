@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   CCard,
   CCardBody,
@@ -13,7 +13,7 @@ import {
   CInputGroup,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPrint, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPrint, faArrowLeft, faArrowRight, faSortUp, faSortDown} from '@fortawesome/free-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -31,6 +31,7 @@ const Transactions = ({ hideActions, hideSearch }) => {
   const [passwordError, setPasswordError] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
+  const [sortConfig, setSortConfig] = useState({ key: '', direction: 'ascending' });
 
   useEffect(() => {
     fetchTransactions();
@@ -49,7 +50,38 @@ const Transactions = ({ hideActions, hideSearch }) => {
       console.error('Error fetching transactions:', error);
     }
   };
-
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+  
+  const sortedTransactions = useMemo(() => {
+    const sortableTransactions = [...filteredTransactions];
+    if (sortConfig.key === 'amount') {
+      sortableTransactions.sort((a, b) => {
+        if (sortConfig.direction === 'ascending') {
+          return a.amount - b.amount;
+        } else {
+          return b.amount - a.amount;
+        }
+      });
+    } else if (sortConfig.key === 'date') {
+      sortableTransactions.sort((a, b) => {
+        const dateA = new Date(a.sale_date);
+        const dateB = new Date(b.sale_date);
+        if (sortConfig.direction === 'ascending') {
+          return dateA - dateB;
+        } else {
+          return dateB - dateA;
+        }
+      });
+    }
+    return sortableTransactions;
+  }, [filteredTransactions, sortConfig]);
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const optionsDate = {
@@ -186,30 +218,46 @@ const Transactions = ({ hideActions, hideSearch }) => {
             <CTableRow>
               <CTableHeaderCell>ID</CTableHeaderCell>
               <CTableHeaderCell>Pack ID</CTableHeaderCell>
-              <CTableHeaderCell>Sale Date</CTableHeaderCell>
-              <CTableHeaderCell>Amount</CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('date')}>
+                SaleDate
+                {sortConfig.key === 'date' && (
+                  <FontAwesomeIcon
+                    icon={sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
+                    className="ms-2"
+                  />
+                )}
+              </CTableHeaderCell>
+              <CTableHeaderCell className="bg-body-tertiary" onClick={() => handleSort('amount')}>
+                Amount
+                {sortConfig.key === 'amount' && (
+                  <FontAwesomeIcon
+                    icon={sortConfig.direction === 'ascending' ? faSortUp : faSortDown}
+                    className="ms-2"
+                  />
+                )}
+              </CTableHeaderCell>
               <CTableHeaderCell>Profit</CTableHeaderCell>
               {!hideActions && <CTableHeaderCell>Actions</CTableHeaderCell>}
             </CTableRow>
           </CTableHead>
           <CTableBody>
-            {currentTransactions.map((transaction) => (
-              <CTableRow key={transaction.id}>
-                <CTableDataCell>{transaction.id}</CTableDataCell>
-                <CTableDataCell>{transaction.pack_id}</CTableDataCell>
-                <CTableDataCell>{formatDate(transaction.sale_date)}</CTableDataCell>
-                <CTableDataCell>{transaction.amount}</CTableDataCell>
-                <CTableDataCell>{transaction.profit}</CTableDataCell>
-                {!hideActions && (
-                  <CTableDataCell>
-                    <CButton color="danger" onClick={() => openModal(transaction)}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </CButton>
-                    <CButton color="info" className="ml-2" onClick={() => handlePrint(transaction)}>
-                      <FontAwesomeIcon icon={faPrint} />
-                    </CButton>
-                  </CTableDataCell>
-                )}
+            {sortedTransactions.slice(offset, offset + itemsPerPage).map((transaction) => (
+          <CTableRow key={transaction.id}>
+            <CTableDataCell>{transaction.id}</CTableDataCell>
+            <CTableDataCell>{transaction.pack_id}</CTableDataCell>
+            <CTableDataCell>{formatDate(transaction.sale_date)}</CTableDataCell>
+            <CTableDataCell>{transaction.amount}</CTableDataCell>
+            <CTableDataCell>{transaction.profit}</CTableDataCell>
+            {!hideActions && (
+              <CTableDataCell>
+                <CButton color="danger" onClick={() => openModal(transaction)}>
+                  <FontAwesomeIcon icon={faTrash} />
+                </CButton>
+                <CButton color="info" className="ml-2" onClick={() => handlePrint(transaction)}>
+                  <FontAwesomeIcon icon={faPrint} />
+                </CButton>
+              </CTableDataCell>
+            )}
               </CTableRow>
             ))}
           </CTableBody>
