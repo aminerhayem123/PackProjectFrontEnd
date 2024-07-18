@@ -61,27 +61,37 @@ const Items = () => {
         },
         body: JSON.stringify({ password }),
       });
-
+  
       if (!response.ok) {
-        if (response.status === 401) {
-          setPasswordError('Incorrect password. Please try again.');
+        const result = await response.json(); // Attempt to parse error response as JSON
+        if (result && result.message) {
+          console.error('Error deleting item:', result.message);
+          // Handle specific error messages as needed
+          if (result.message === 'Password incorrect. Access denied.') {
+            setPasswordError(result.message); // Set specific error message for incorrect password
+          } else {
+            // Handle other error cases if necessary
+            throw new Error(result.message); // Propagate error for other cases
+          }
         } else {
-          throw new Error('Network response was not ok');
+          throw new Error('Network response was not ok'); // Fallback for unexpected errors
         }
       }
-
+  
+      // Handle success case
       const result = await response.json();
       if (result.success) {
         setItems(items.filter(item => item.id !== itemIdToDelete));
         setShowModal(false);
-        window.location.reload();
       } else {
         console.error('Error deleting item:', result.message);
       }
     } catch (error) {
       console.error('Error deleting item:', error);
+      // Handle general error cases, e.g., network issues
     }
   };
+  
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
