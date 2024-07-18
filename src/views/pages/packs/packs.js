@@ -73,6 +73,7 @@ const Packs = ({ hideActions, hideSearch }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const packsPerPage = 10; // Number of packs to display per page
+  const [salePassword, setSalePassword] = useState('');
   const [formData, setFormData] = useState({
     brand: '',
     numberOfItems: 1,
@@ -349,27 +350,32 @@ const Packs = ({ hideActions, hideSearch }) => {
 
   const handleSaleSubmit = async (e) => {
     e.preventDefault();
+
     if (Number(saleAmount) < selectedPackPrice) {
       setErrorMessage('Amount value should be bigger or equal to price.');
       return;
     }
-    const profit = saleAmount - selectedPackPrice;
-  
+
     try {
       const response = await axios.post(`http://localhost:5000/packs/${selectedPackId}/sold`, {
         amount: saleAmount,
-        profit: profit,
+        password: salePassword, // Include the password in the request
       });
       window.location.reload();
       console.log('Sale recorded successfully:', response.data);
-  
+
       // Close the modal after submitting
       setShowSaleModal(false);
-  
+
       // Refresh packs data
       fetchPacks();
     } catch (error) {
       console.error('Error recording sale:', error);
+      if (error.response && error.response.status === 401) {
+        setErrorMessage('Incorrect password');
+      } else {
+        setErrorMessage('Error recording sale');
+      }
     }
   };
 
@@ -686,7 +692,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
         </Modal.Body>
       </Modal>
        {/* Modal for marking pack as sold */}
-       <Modal show={showSaleModal} onHide={() => setShowSaleModal(false)}>
+      <Modal show={showSaleModal} onHide={() => setShowSaleModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Sold</Modal.Title>
         </Modal.Header>
@@ -703,7 +709,19 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
               />
               {errorMessage && <Form.Text className="text-danger">{errorMessage}</Form.Text>}
             </Form.Group>
-            <br></br>
+
+            <Form.Group controlId="password">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter password"
+                value={salePassword}
+                onChange={(e) => setSalePassword(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <br />
             <Button variant="primary" type="submit">
               Submit
             </Button>
