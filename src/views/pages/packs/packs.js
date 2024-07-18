@@ -25,13 +25,15 @@ import {
 import PackStatusCell from './PackStatusCell';
 import { useDropzone } from 'react-dropzone';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCaretUp, faCaretDown } from '@fortawesome/free-solid-svg-icons';
+import { faCaretUp, faCaretDown,faArrowLeft,faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { useMemo } from 'react';
 import { Trash } from 'react-bootstrap-icons';
 import AddImageModal from './AddImageModal'
 import avatar1 from 'src/assets/images/avatars/1.jpg';
+import ReactPaginate from 'react-paginate';
+import  '../items/items.css';
 
 const Packs = () => {
   const formatDate = (date) => {
@@ -69,6 +71,8 @@ const Packs = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const packsPerPage = 10; // Number of packs to display per page
   const [formData, setFormData] = useState({
     brand: '',
     numberOfItems: 1,
@@ -82,19 +86,21 @@ const Packs = () => {
   });
   const [selectedImageIds, setSelectedImageIds] = useState([]); // State to hold IDs of selected images to delete
 
-   useEffect(() => {
+  useEffect(() => {
+    const fetchPacks = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/packs');
+        const data = await response.json();
+        setPacks(data);
+      } catch (error) {
+        console.error('Error fetching packs:', error);
+      }
+    };
+
     fetchPacks();
     fetchCategories();
   }, []);
 
-  const fetchPacks = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/packs');
-      setPacks(response.data);
-    } catch (error) {
-      console.error('Error fetching packs:', error);
-    }
-  };
 
   const fetchCategories = async () => {
     try {
@@ -313,13 +319,25 @@ const Packs = () => {
   const filteredPacks = useMemo(() => {
     let filteredData = sortedPacks;
     // Filter by search input
-  if (searchFilter) {
-    const lowercasedFilter = searchFilter.toLowerCase();
-    filteredData = filteredData.filter(pack => 
-      pack.brand.toLowerCase().includes(lowercasedFilter) ||
-      pack.id.toString().toLowerCase().includes(lowercasedFilter)
-    );
-  }
+    if (searchFilter) {
+      const lowercasedFilter = searchFilter.toLowerCase();
+      filteredData = filteredData.filter(pack => {
+        // Check for existence of each property before accessing them
+        const brand = pack.brand && pack.brand.toLowerCase();
+        const category = pack.category && pack.category.toString().toLowerCase();
+        const price = pack.price && pack.price.toString().toLowerCase();
+        const numberOfItems = pack.NumberofItems && pack.NumberofItems.toString().toLowerCase();
+        const id = pack.id && pack.id.toString().toLowerCase();
+  
+        return (
+          (brand && brand.includes(lowercasedFilter)) ||
+          (category && category.includes(lowercasedFilter)) ||
+          (price && price.includes(lowercasedFilter)) ||
+          (numberOfItems && numberOfItems.includes(lowercasedFilter)) ||
+          (id && id.includes(lowercasedFilter))
+        );
+      });
+    }
     return filteredData;
   }, [sortedPacks,searchFilter]);
   
@@ -375,6 +393,14 @@ const handleSaleAmountChange = (e) => {
     setErrorMessage('Invalid amount entered.'); // Display error for invalid input
   }
 };
+
+const handlePageClick = (data) => {
+  setCurrentPage(data.selected);
+};
+// Calculate offset for pagination
+const offset = currentPage * packsPerPage;
+const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPerPage), [filteredPacks, currentPage]);
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -425,7 +451,7 @@ const handleSaleAmountChange = (e) => {
             </CTableRow>
           </CTableHead>
           <CTableBody>
-          {filteredPacks.map((pack, index) => (
+          {currentPacks.map((pack, index) => (
               <CTableRow key={index}>
                 <CTableDataCell>{pack.id}</CTableDataCell>
                 <CTableDataCell>{pack.brand}</CTableDataCell>
@@ -478,6 +504,21 @@ const handleSaleAmountChange = (e) => {
             ))}
           </CTableBody>
         </CTable>
+        <div className="d-flex justify-content-end mt-3">
+          <ReactPaginate
+            previousLabel={<FontAwesomeIcon icon={faArrowLeft} />}
+            nextLabel={<FontAwesomeIcon icon={faArrowRight} />}
+            breakLabel={'...'}
+            breakClassName={'break-me'}
+            pageCount={Math.ceil(filteredPacks.length / packsPerPage)}
+            marginPagesDisplayed={2}
+            pageRangeDisplayed={5}
+            onPageChange={handlePageClick}
+            containerClassName={'pagination'}
+            subContainerClassName={'pages pagination'}
+            activeClassName={'active'}
+          />
+        </div>
         </CCardBody>
       </CCard>
       {/* Modal Add Images */}
