@@ -90,8 +90,8 @@ const WidgetsDropdown = (props) => {
     return parseFloat(percentage).toFixed(3);
   };
 
- // Function to generate and download PDF
- const generatePDF = async () => {
+// Function to generate and download PDF
+const generatePDF = async () => {
   try {
     // Fetch statistics from the API
     const response = await axios.get('http://localhost:5000/stats');
@@ -143,17 +143,17 @@ const WidgetsDropdown = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr><td style="${tdStyle}">Total Number of Items</td><td style="${tdStyle}">${stats.totalItems}</td></tr>
           <tr><td style="${tdStyle}">Total Packs Sold</td><td style="${tdStyle}">${stats.totalPacksSold}</td></tr>
+          <tr><td style="${tdStyle}">Total Number of Items</td><td style="${tdStyle}">${stats.totalItems}</td></tr>
           <tr><td style="${tdStyle}">Total Profit</td><td style="${tdStyle}">${stats.totalProfit}</td></tr>
           <tr><td style="${tdStyle}">Total Expenses</td><td style="${tdStyle}">${stats.totalExpenses}</td></tr>
           <tr><td style="${tdStyle}">Percentage of Profit from Expenses</td><td style="${tdStyle}">${stats.profitPercentage.toFixed(2)}%</td></tr>
           <tr><td style="${tdStyle}">Profit This Month</td><td style="${tdStyle}">${stats.monthlyProfit}</td></tr>
-          <tr><td style="${tdStyle}">Expenses This Month</td><td style="${tdStyle}">${stats.monthlyExpenses}</td></tr>
-          <tr><td style="${tdStyle}">Percentage of Profit This Month</td><td style="${tdStyle}">${stats.monthlyProfitPercentage.toFixed(2)}%</td></tr>
           <tr><td style="${tdStyle}">Profit This Year</td><td style="${tdStyle}">${stats.yearlyProfit}</td></tr>
-          <tr><td style="${tdStyle}">Expenses This Year</td><td style="${tdStyle}">${stats.yearlyExpenses}</td></tr>
+          <tr><td style="${tdStyle}">Percentage of Profit This Month</td><td style="${tdStyle}">${stats.monthlyProfitPercentage.toFixed(2)}%</td></tr>
           <tr><td style="${tdStyle}">Percentage of Profit This Year</td><td style="${tdStyle}">${stats.yearlyProfitPercentage.toFixed(2)}%</td></tr>
+          <tr><td style="${tdStyle}">Expenses This Month</td><td style="${tdStyle}">${stats.monthlyExpenses}</td></tr>
+          <tr><td style="${tdStyle}">Expenses This Year</td><td style="${tdStyle}">${stats.yearlyExpenses}</td></tr>
         </tbody>
       </table>
     `;
@@ -166,6 +166,8 @@ const WidgetsDropdown = (props) => {
           <tr>
             <th style="${thStyle}">Category</th>
             <th style="${thStyle}">Number of Items</th>
+            <th style="${thStyle}">Packs Sold</th>
+            <th style="${thStyle}">Profit</th>
           </tr>
         </thead>
         <tbody>
@@ -173,6 +175,8 @@ const WidgetsDropdown = (props) => {
             <tr>
               <td style="${tdStyle}">${item.category}</td>
               <td style="${tdStyle}">${item.number_of_items}</td>
+              <td style="${tdStyle}">${item.packs_sold}</td>
+              <td style="${tdStyle}">${item.category_profit}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -193,33 +197,28 @@ const WidgetsDropdown = (props) => {
         });
 
         const imgWidth = 210; // A4 width in mm
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-
-        // Add image to PDF
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-
-        // Check if content exceeds a single page and add additional pages if needed
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
-        const pageHeight = pdf.internal.pageSize.height;
+
         let position = 0;
 
-        while (heightLeft > 0) {
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
           pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
-          position -= pageHeight;
-          if (heightLeft > 0) pdf.addPage();
         }
 
-        // Save PDF
-        pdf.save('stats.pdf');
-        
-        // Clean up
-        document.body.removeChild(pdfContainer);
+        pdf.save('statistics_report.pdf');
+        pdfContainer.remove();
       });
-    }, 1000); // Adjust the delay if necessary
-
+    }, 1000);
   } catch (error) {
-    console.error('Error fetching statistics:', error);
+    console.error('Error generating PDF:', error);
   }
 };
   
