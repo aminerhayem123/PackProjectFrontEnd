@@ -613,9 +613,14 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
               name="numberOfItems"
               value={formData.numberOfItems}
               onChange={handleFormChange}
+              min="1" // Minimum value set to 1 to ensure positive number
+              step="1" // Ensures only whole numbers are accepted
               required
             />
-            <br />
+            <Form.Control.Feedback type="invalid">
+              Please enter a number greater than 0.
+            </Form.Control.Feedback>
+          <br />
           </Form.Group>
           <Form.Group controlId="formCategory">
             <Form.Label>Category</Form.Label>
@@ -707,15 +712,27 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
             </Form.Group>
             <br></br>
             <Form.Group controlId="formPackNumberOfItems">
-              <Form.Label>Number of Items</Form.Label>
-              <Form.Control
-                type="number"
-                placeholder="Enter number of items"
-                value={newItemData.number_of_items}
-                onChange={(e) => setNewItemData({ ...newItemData, number_of_items: e.target.value })}
-                required
-              />
-            </Form.Group>
+            <Form.Label>Number of Items</Form.Label>
+            <Form.Control
+              type="number"
+              placeholder="Enter number of items"
+              value={newItemData.number_of_items}
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                if (value <= 0) {
+                  // Handle invalid input, e.g., show a message or restrict value
+                  console.log("Number of items must be greater than 0");
+                }
+                setNewItemData({ ...newItemData, number_of_items: e.target.value });
+              }}
+              min="1" // Minimum value set to 1
+              step="1" // Ensures only whole numbers are accepted
+              required
+            />
+            <Form.Control.Feedback type="invalid">
+              Please enter a number greater than 0.
+            </Form.Control.Feedback>
+          </Form.Group>
             <br></br>
             <Form.Group controlId="formPackPrice">
               <Form.Label>Price</Form.Label>
