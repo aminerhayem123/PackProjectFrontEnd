@@ -9,14 +9,10 @@ import {
   CTableHead,
   CTableHeaderCell,
   CTableRow,
-  CButton,
   CInputGroup,
 } from '@coreui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import avatar from 'src/assets/images/avatars/1.jpg';
 import ReactPaginate from 'react-paginate';
 import './items.css';
@@ -24,10 +20,6 @@ import './items.css';
 const Items = () => {
   const [items, setItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [itemIdToDelete, setItemIdToDelete] = useState(null);
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
 
@@ -52,67 +44,9 @@ const Items = () => {
     }
   };
 
-  const deleteItem = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/items/${itemIdToDelete}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
-  
-      if (!response.ok) {
-        const result = await response.json(); // Attempt to parse error response as JSON
-        if (result && result.message) {
-          console.error('Error deleting item:', result.message);
-          // Handle specific error messages as needed
-          if (result.message === 'Password incorrect. Access denied.') {
-            setPasswordError(result.message); // Set specific error message for incorrect password
-          } else {
-            // Handle other error cases if necessary
-            throw new Error(result.message); // Propagate error for other cases
-          }
-        } else {
-          throw new Error('Network response was not ok'); // Fallback for unexpected errors
-        }
-      }
-  
-      // Handle success case
-      const result = await response.json();
-      if (result.success) {
-        setItems(items.filter(item => item.id !== itemIdToDelete));
-        setShowModal(false);
-      } else {
-        console.error('Error deleting item:', result.message);
-      }
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      // Handle general error cases, e.g., network issues
-    }
-  };
-  
-
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(0); // Reset to the first page when searching
-  };
-
-  const handleOpenModal = (id) => {
-    setItemIdToDelete(id);
-    setShowModal(true);
-    setPassword('');
-    setPasswordError(null);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setPassword('');
-    setPasswordError(null);
-  };
-
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
   };
 
   const handlePageClick = (data) => {
@@ -145,21 +79,21 @@ const Items = () => {
             <CTableRow>
               <CTableHeaderCell className="bg-body-tertiary">ID</CTableHeaderCell>
               <CTableHeaderCell className="bg-body-tertiary">Pack ID</CTableHeaderCell>
-              <CTableHeaderCell className="bg-body-tertiary">Actions</CTableHeaderCell>
             </CTableRow>
           </CTableHead>
           <CTableBody>
-            {currentItems.map((item) => (
-              <CTableRow key={item.id}>
-                <CTableDataCell>{item.id}</CTableDataCell>
-                <CTableDataCell>{item.pack_id}</CTableDataCell>
-                <CTableDataCell>
-                  <CButton color="danger" onClick={() => handleOpenModal(item.id)}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </CButton>
-                </CTableDataCell>
+            {currentItems.length === 0 ? (
+              <CTableRow>
+                <CTableDataCell colSpan="2">No items found</CTableDataCell>
               </CTableRow>
-            ))}
+            ) : (
+              currentItems.map((item) => (
+                <CTableRow key={item.id}>
+                  <CTableDataCell>{item.id}</CTableDataCell>
+                  <CTableDataCell>{item.pack_id}</CTableDataCell>
+                </CTableRow>
+              ))
+            )}
           </CTableBody>
         </CTable>
 
@@ -178,34 +112,6 @@ const Items = () => {
             activeClassName={'active'}
           />
         </div>
-
-        <Modal show={showModal} onHide={handleCloseModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Delete Item</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p>Are you sure you want to delete this item?</p>
-            <Form.Group controlId="password">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="text"
-                value={password}
-                onChange={handlePasswordChange}
-                placeholder="Enter your password..."
-                isInvalid={passwordError}
-              />
-              <Form.Control.Feedback type="invalid">{passwordError}</Form.Control.Feedback>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
-            <Button variant="danger" onClick={deleteItem}>
-              Delete
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </CCardBody>
     </CCard>
   );
