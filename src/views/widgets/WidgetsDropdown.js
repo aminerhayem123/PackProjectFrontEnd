@@ -97,6 +97,9 @@ const WidgetsDropdown = (props) => {
     const response = await axios.get('http://localhost:5000/stats');
     const stats = response.data;
 
+    // Get current date
+    const currentDate = new Date().toLocaleDateString();
+
     // Create a container for the content
     const pdfContainer = document.createElement('div');
     pdfContainer.style.width = '210mm'; // A4 width in mm
@@ -122,9 +125,16 @@ const WidgetsDropdown = (props) => {
       padding: 8px;
     `;
 
+    // Add current date
+    pdfContainer.innerHTML += `
+      <h2>Statistics Report</h2>
+      <p>Date: ${currentDate}</p>
+      <hr/>
+    `;
+
     // Generate the first table for statistics
     pdfContainer.innerHTML += `
-      <h2>Total Statistics</h2>
+      <h3>Total Statistics</h3>
       <table style="${tableStyle}">
         <thead>
           <tr>
@@ -150,7 +160,7 @@ const WidgetsDropdown = (props) => {
 
     // Generate the second table for items by category
     pdfContainer.innerHTML += `
-      <h2>Number of Items in Each Category</h2>
+      <h3>Number of Items in Each Category</h3>
       <table style="${tableStyle}">
         <thead>
           <tr>
