@@ -235,7 +235,6 @@ const Packs = ({ hideActions, hideSearch }) => {
   const handleUpdatePack = async (e) => {
     e.preventDefault();
     try {
-      // Ensure newItemData.id is set correctly before proceeding
       if (!newItemData.id) {
         console.error('Pack ID is missing.');
         return;
@@ -248,8 +247,9 @@ const Packs = ({ hideActions, hideSearch }) => {
         number_of_items: newItemData.number_of_items,
         price: newItemData.price
       });
+  
       // Refresh the packs list after updating the pack
-      window.location.reload();  
+      window.location.reload();
       // Reset the form and modal state
       setShowItemForm(false);
       setNewItemData({
@@ -261,8 +261,13 @@ const Packs = ({ hideActions, hideSearch }) => {
       });
     } catch (error) {
       console.error('Error updating pack:', error);
+      if (error.response && error.response.status === 400) {
+        setErrorMessage(error.response.data.error); 
+      } else {
+        setErrorMessage('Error updating pack');
+      }
     }
-  };  
+};
   
   const handleShowImages = (images) => {
     setModalImages(images);
@@ -689,6 +694,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                 required
               />
             </Form.Group>
+            <br></br>
             <Form.Group controlId="formPackCategory">
               <Form.Label>Category</Form.Label>
               <Form.Control
@@ -699,6 +705,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                 required
               />
             </Form.Group>
+            <br></br>
             <Form.Group controlId="formPackNumberOfItems">
               <Form.Label>Number of Items</Form.Label>
               <Form.Control
@@ -709,6 +716,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
                 required
               />
             </Form.Group>
+            <br></br>
             <Form.Group controlId="formPackPrice">
               <Form.Label>Price</Form.Label>
               <Form.Control
@@ -720,6 +728,7 @@ const currentPacks = useMemo(() => filteredPacks.slice(offset, offset + packsPer
               />
             </Form.Group>
             <br></br>
+            {errorMessage && <p className="text-danger">{errorMessage}</p>}
             <Button variant="primary" type="submit">
               Update Pack
             </Button>
