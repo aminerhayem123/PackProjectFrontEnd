@@ -20,6 +20,7 @@ import Form from 'react-bootstrap/Form';
 import jsPDF from 'jspdf';
 import ReactPaginate from 'react-paginate';
 import '../items/items.css';
+import 'jspdf-autotable';
 
 const Transactions = ({ hideActions, hideSearch }) => {
   const [transactions, setTransactions] = useState([]);
@@ -117,23 +118,56 @@ const Transactions = ({ hideActions, hideSearch }) => {
     setCurrentPage(0);
   };
 
-  const handlePrint = (transaction) => {
-    const doc = new jsPDF();
+// Function to handle the PDF generation
+const handlePrint = (transaction) => {
+  // Assuming `transaction` already contains pack information
+  const pack = { category: transaction.category }; // Extract pack info from transaction
 
-    doc.setFontSize(14);
-    doc.text('Company Name', 15, 15);
+  // Generate PDF with the transaction and pack data
+  handlePrintWithPack(transaction, pack);
+};
 
-    const currentDate = new Date();
-    const formattedDate = formatDate(currentDate);
+const handlePrintWithPack = (transaction, pack) => {
+  const doc = new jsPDF();
 
-    doc.text(`Date and Time: ${formattedDate}`, 15, 25);
-    doc.text(`Transaction ID: ${transaction.id}`, 15, 35);
-    doc.text(`Sold Pack ID: ${transaction.pack_id}`, 15, 45);
-    doc.text(`Amount: ${transaction.amount}`, 15, 55);
-    doc.text(`Profit: ${transaction.profit}`, 15, 65);
+  // Set company name
+  doc.setFontSize(14);
+  doc.text('Company Name', 15, 15);
 
-    doc.save(`Transaction_${transaction.id}.pdf`);
-  };
+  const currentDate = new Date();
+  const formattedDate = formatDate(currentDate);
+
+  // Add date and time
+  doc.setFontSize(10);
+  doc.text(`Date and Time: ${formattedDate}`, 15, 25);
+
+  // Table headers and data
+  const tableColumn = ["Field", "Value"];
+  const tableRows = [
+    ["Transaction ID", transaction.id],
+    ["Sold Pack ID", transaction.pack_id],
+    ["Pack Category", pack.category],
+    ["Amount", transaction.amount],
+    ["Profit", transaction.profit],
+  ];
+
+  // Add table
+  doc.autoTable({
+    startY: 35,
+    head: [tableColumn],
+    body: tableRows,
+    theme: 'striped', // Use 'striped' or 'grid' for a better look
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] }, // Black header with white text
+    columnStyles: {
+      0: { cellWidth: 60 }, // Adjust column width if necessary
+      1: { cellWidth: 130 }
+    }
+  });
+
+  // Save the PDF
+  doc.save(`Transaction_${transaction.id}.pdf`);
+};
 
   const openModal = (transaction) => {
     setTransactionToDelete(transaction);
