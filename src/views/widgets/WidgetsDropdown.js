@@ -1,18 +1,24 @@
 import React, { useEffect, useRef , useState } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   CRow,
   CCol,
   CDropdown,
   CDropdownToggle,
   CWidgetStatsA,
+  CDropdownMenu,
+  CDropdownItem,
 } from '@coreui/react';
 import { getStyle } from '@coreui/utils';
 import { CChartBar, CChartLine } from '@coreui/react-chartjs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import CIcon from '@coreui/icons-react';
+import { faChartPie } from '@fortawesome/free-solid-svg-icons';
 import { cilArrowBottom, cilArrowTop, cilOptions } from '@coreui/icons';
-
+import { FaChartBar } from 'react-icons/fa';
 const WidgetsDropdown = (props) => {
   const [packCount, setPackCount] = useState(null);
   const [packsold, setPacksold] = useState(null);
@@ -84,6 +90,129 @@ const WidgetsDropdown = (props) => {
     return parseFloat(percentage).toFixed(3);
   };
 
+ // Function to generate and download PDF
+ const generatePDF = async () => {
+  try {
+    // Fetch statistics from the API
+    const response = await axios.get('http://localhost:5000/stats');
+    const stats = response.data;
+
+    // Create a container for the content
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.width = '210mm'; // A4 width in mm
+    pdfContainer.style.padding = '20mm'; // Add padding
+    pdfContainer.style.boxSizing = 'border-box';
+    pdfContainer.style.fontFamily = 'Arial, sans-serif';
+
+    // Style for tables
+    const tableStyle = `
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    `;
+    
+    const thStyle = `
+      border: 1px solid #000;
+      padding: 8px;
+      background-color: #f2f2f2;
+    `;
+    
+    const tdStyle = `
+      border: 1px solid #000;
+      padding: 8px;
+    `;
+
+    // Generate the first table for statistics
+    pdfContainer.innerHTML += `
+      <h2>Total Statistics</h2>
+      <table style="${tableStyle}">
+        <thead>
+          <tr>
+            <th style="${thStyle}">Metric</th>
+            <th style="${thStyle}">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="${tdStyle}">Total Number of Items</td><td style="${tdStyle}">${stats.totalItems}</td></tr>
+          <tr><td style="${tdStyle}">Total Packs Sold</td><td style="${tdStyle}">${stats.totalPacksSold}</td></tr>
+          <tr><td style="${tdStyle}">Total Profit</td><td style="${tdStyle}">${stats.totalProfit}</td></tr>
+          <tr><td style="${tdStyle}">Total Expenses</td><td style="${tdStyle}">${stats.totalExpenses}</td></tr>
+          <tr><td style="${tdStyle}">Percentage of Profit from Expenses</td><td style="${tdStyle}">${stats.profitPercentage.toFixed(2)}%</td></tr>
+          <tr><td style="${tdStyle}">Profit This Month</td><td style="${tdStyle}">${stats.monthlyProfit}</td></tr>
+          <tr><td style="${tdStyle}">Expenses This Month</td><td style="${tdStyle}">${stats.monthlyExpenses}</td></tr>
+          <tr><td style="${tdStyle}">Percentage of Profit This Month</td><td style="${tdStyle}">${stats.monthlyProfitPercentage.toFixed(2)}%</td></tr>
+          <tr><td style="${tdStyle}">Profit This Year</td><td style="${tdStyle}">${stats.yearlyProfit}</td></tr>
+          <tr><td style="${tdStyle}">Expenses This Year</td><td style="${tdStyle}">${stats.yearlyExpenses}</td></tr>
+          <tr><td style="${tdStyle}">Percentage of Profit This Year</td><td style="${tdStyle}">${stats.yearlyProfitPercentage.toFixed(2)}%</td></tr>
+        </tbody>
+      </table>
+    `;
+
+    // Generate the second table for items by category
+    pdfContainer.innerHTML += `
+      <h2>Number of Items in Each Category</h2>
+      <table style="${tableStyle}">
+        <thead>
+          <tr>
+            <th style="${thStyle}">Category</th>
+            <th style="${thStyle}">Number of Items</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stats.itemsByCategory.map(item => `
+            <tr>
+              <td style="${tdStyle}">${item.category}</td>
+              <td style="${tdStyle}">${item.number_of_items}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    // Append the container to the body
+    document.body.appendChild(pdfContainer);
+
+    // Wait for the content to be rendered
+    setTimeout(() => {
+      html2canvas(pdfContainer, { useCORS: true, scale: 2 }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'p', // Portrait
+          unit: 'mm', // Units in mm
+          format: 'a4', // A4 paper format
+        });
+
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        // Add image to PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+        // Check if content exceeds a single page and add additional pages if needed
+        let heightLeft = imgHeight;
+        const pageHeight = pdf.internal.pageSize.height;
+        let position = 0;
+
+        while (heightLeft > 0) {
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          position -= pageHeight;
+          if (heightLeft > 0) pdf.addPage();
+        }
+
+        // Save PDF
+        pdf.save('stats.pdf');
+        
+        // Clean up
+        document.body.removeChild(pdfContainer);
+      });
+    }, 1000); // Adjust the delay if necessary
+
+  } catch (error) {
+    console.error('Error fetching statistics:', error);
+  }
+};
+  
   return (
     <CRow className={props.className} xs={{ gutter: 4 }}>
       <CCol sm={6} xl={4} xxl={3}>
@@ -331,6 +460,101 @@ const WidgetsDropdown = (props) => {
                     radius: 0,
                     hitRadius: 10,
                     hoverRadius: 4,
+                  },
+                },
+              }}
+            />
+          }
+        />
+      </CCol>
+      <CCol sm={6} xl={4} xxl={3}>
+        <CWidgetStatsA
+          color="danger"
+          value={
+            <>
+              {' '}
+              <span className="fs-6 fw-normal">
+              <FontAwesomeIcon icon={faChartPie} />
+              </span>
+            </>
+          }
+          title={
+          <>
+          <FaChartBar /> Full Stats
+          </>
+          }
+          action={
+            <CDropdown alignment="end">
+              <CDropdownToggle color="transparent" caret={false} className="text-white p-0">
+                <CIcon icon={cilOptions} />
+              </CDropdownToggle>
+              <CDropdownMenu>
+              <CDropdownItem onClick={generatePDF}>Download Stats as PDF</CDropdownItem>
+              </CDropdownMenu>
+            </CDropdown>
+          }
+          chart={
+            <CChartBar
+              className="mt-3 mx-3"
+              style={{ height: '70px' }}
+              data={{
+                labels: [
+                  'January',
+                  'February',
+                  'March',
+                  'April',
+                  'May',
+                  'June',
+                  'July',
+                  'August',
+                  'September',
+                  'October',
+                  'November',
+                  'December',
+                  'January',
+                  'February',
+                  'March',
+                  'April',
+                ],
+                datasets: [
+                  {
+                    label: 'My First dataset',
+                    backgroundColor: 'rgba(255,255,255,.2)',
+                    borderColor: 'rgba(255,255,255,.55)',
+                    data: [78, 81, 80, 45, 34, 12, 40, 85, 65, 23, 12, 98, 34, 84, 67, 82],
+                    barPercentage: 0.6,
+                  },
+                ],
+              }}
+              options={{
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                },
+                scales: {
+                  x: {
+                    grid: {
+                      display: false,
+                      drawTicks: false,
+                    },
+                    ticks: {
+                      display: false,
+                    },
+                  },
+                  y: {
+                    border: {
+                      display: false,
+                    },
+                    grid: {
+                      display: false,
+                      drawBorder: false,
+                      drawTicks: false,
+                    },
+                    ticks: {
+                      display: false,
+                    },
                   },
                 },
               }}
