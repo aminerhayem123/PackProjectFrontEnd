@@ -40,7 +40,7 @@ const Transactions = ({ hideActions, hideSearch }) => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/transactions');
+      const response = await fetch('https:packprojectbackend-production.up.railway.app/transactions');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -193,7 +193,7 @@ const handlePrintWithPack = (transaction, pack) => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/transactions/${transactionToDelete.id}`, {
+      const response = await fetch(`https:packprojectbackend-production.up.railway.app/transactions/${transactionToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

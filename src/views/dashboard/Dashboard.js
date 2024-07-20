@@ -30,7 +30,7 @@ const Dashboard = ({ handleLogout }) => {
 
   const fetchPacks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/packs');
+      const response = await axios.get('https:packprojectbackend-production.up.railway.app/packs');
       setPacks(response.data);
     } catch (error) {
       console.error('Error fetching packs:', error);
@@ -48,7 +48,7 @@ const Dashboard = ({ handleLogout }) => {
   useEffect(() => {
     const fetchAggregatedPacks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/aggregated-packs');
+        const response = await axios.get('https:packprojectbackend-production.up.railway.app/aggregated-packs');
         setAggregatedPacks(response.data);
       } catch (error) {
         console.error('Error fetching aggregated packs:', error);
