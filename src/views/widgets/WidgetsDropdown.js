@@ -29,7 +29,7 @@ const WidgetsDropdown = (props) => {
   useEffect(() => {
     const fetchPackCount = async () => {
       try {
-        const response = await fetch('https:packprojectbackend-production.up.railway.app/packs/count');
+        const response = await fetch('https://packprojectbackend-production.up.railway.app/packs/count');
         if (!response.ok) {
           throw new Error('Failed to fetch pack count');
         }
@@ -48,7 +48,7 @@ const WidgetsDropdown = (props) => {
   useEffect(() => {
     const fetchPackSold = async () => {
       try {
-        const response = await fetch('https:packprojectbackend-production.up.railway.app/packs/Sold');
+        const response = await fetch('https://packprojectbackend-production.up.railway.app/packs/Sold');
         if (!response.ok) {
           throw new Error('Failed to fetch pack count');
         }
@@ -68,7 +68,7 @@ const WidgetsDropdown = (props) => {
    useEffect(() => {
     const fetchProfitData = async () => {
       try {
-        const response = await fetch('https:packprojectbackend-production.up.railway.app/transactions/profits');
+        const response = await fetch('https://packprojectbackend-production.up.railway.app/transactions/profits');
         if (!response.ok) {
           throw new Error('Failed to fetch profit data');
         }
@@ -94,7 +94,7 @@ const WidgetsDropdown = (props) => {
 const generatePDF = async () => {
   try {
     // Fetch statistics from the API
-    const response = await axios.get('https:packprojectbackend-production.up.railway.app/stats');
+    const response = await axios.get('https://packprojectbackend-production.up.railway.app/stats');
     const stats = response.data;
 
     // Get current date
