@@ -34,6 +34,7 @@ const App = () => {
   }, [storedTheme]);
 
   const handleLogin = async (email, password) => {
+    console.error('Data:', email, password);
     try {
       const response = await fetch('https:packprojectbackend-production.up.railway.app/login', {
         method: 'POST',
