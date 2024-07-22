@@ -94,7 +94,7 @@ const Packs = ({ hideActions, hideSearch }) => {
   useEffect(() => {
     const fetchPacks = async () => {
       try {
-        const response = await fetch('https:packprojectbackend-production.up.railway.app/packs');
+        const response = await fetch('https://packprojectbackend-production.up.railway.app/packs');
         const data = await response.json();
         setPacks(data);
       } catch (error) {
@@ -109,7 +109,7 @@ const Packs = ({ hideActions, hideSearch }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('https:packprojectbackend-production.up.railway.app/categories');
+      const response = await axios.get('https://packprojectbackend-production.up.railway.app/categories');
       const categoriesData = response.data;
 
       setCategories(categoriesData); // Assuming categoriesData is an array of strings
@@ -216,7 +216,7 @@ const Packs = ({ hideActions, hideSearch }) => {
     });
 
     try {
-      const response = await axios.post('https:packprojectbackend-production.up.railway.app/packs', data, {
+      const response = await axios.post('https://packprojectbackend-production.up.railway.app/packs', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -245,7 +245,7 @@ const Packs = ({ hideActions, hideSearch }) => {
       }
   
       // Send the PUT request to update the pack details
-      await axios.put(`https:packprojectbackend-production.up.railway.app/packs/${newItemData.id}`, {
+      await axios.put(`https://packprojectbackend-production.up.railway.app/packs/${newItemData.id}`, {
         brand: newItemData.brand,
         category: newItemData.category,
         number_of_items: newItemData.number_of_items,
@@ -296,7 +296,7 @@ const Packs = ({ hideActions, hideSearch }) => {
 
   const handleDeleteSelectedImages = async () => {
     try {
-      await axios.delete(`https:packprojectbackend-production.up.railway.app/images/delete`, {
+      await axios.delete(`https://packprojectbackend-production.up.railway.app/images/delete`, {
         data: { imageIds: selectedImageIds }, // Pass array of selected image IDs to delete
       });
   
@@ -364,7 +364,7 @@ const Packs = ({ hideActions, hideSearch }) => {
     }
 
     try {
-      const response = await axios.post(`https:packprojectbackend-production.up.railway.app/packs/${selectedPackId}/sold`, {
+      const response = await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${selectedPackId}/sold`, {
         amount: saleAmount,
         password: salePassword, // Include the password in the request
       });
@@ -439,7 +439,7 @@ const handleDelete = async () => {
       return;
     }
 
-    const response = await fetch(`https:packprojectbackend-production.up.railway.app/packs/${packToDelete.id}`, {
+    const response = await fetch(`https://packprojectbackend-production.up.railway.app/packs/${packToDelete.id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
