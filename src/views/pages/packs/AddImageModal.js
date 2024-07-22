@@ -39,7 +39,7 @@ const AddImageModal = ({ show, onHide, packId, handleShowModal }) => {
   
     try {
       // Adjust the URL to match your backend endpoint
-      const response = await axios.post(`https:packprojectbackend-production.up.railway.app/packs/${packId}/images`, formData, {
+      const response = await axios.post(`https://packprojectbackend-production.up.railway.app/packs/${packId}/images`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
