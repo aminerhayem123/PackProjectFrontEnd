@@ -29,7 +29,7 @@ const Items = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('https:packprojectbackend-production.up.railway.app/items');
+      const response = await fetch('https://packprojectbackend-production.up.railway.app/items');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
