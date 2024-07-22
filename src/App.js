@@ -35,7 +35,7 @@ const App = () => {
 
   const handleLogin = async (email, password) => {
     try {
-      const response = await fetch('https:packprojectbackend-production.up.railway.app:5000/login', {
+      const response = await fetch('https:packprojectbackend-production.up.railway.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +44,8 @@ const App = () => {
       });
 
       const data = await response.json();
-
+      console.error('Data:', data);
+      
       if (!response.ok) {
         return data.message; // Return the error message
       }
@@ -54,7 +55,7 @@ const App = () => {
       return null; // No error message
     } catch (error) {
       console.error('Login error:', error);
-      return 'Server error'; // Return a generic error message
+      return 'Server error - Data Bases'; // Return a generic error message
     }
   };
 
